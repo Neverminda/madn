@@ -1,9 +1,9 @@
 #include "Game.h"
 #include "constants.h"
-#include <iostream>
-#include <sstream>
+#include <print>
+#include <array>
 
-Game::Game() : pawn_positions(), current_player(0), game_over(false) {
+Game::Game() : pawn_positions(), current_player(PlayerID::A), game_over(false) {
     // All pawns start in the home
     for (auto &player_pawns: pawn_positions) {
         player_pawns.fill(POS_HOME);
@@ -11,9 +11,9 @@ Game::Game() : pawn_positions(), current_player(0), game_over(false) {
     }
 }
 
-bool Game::check_for_win(const int player_id) const {
+bool Game::check_for_win(const PlayerID player_id) const {
     for (int i = 0; i < 4; ++i) {
-        if (pawn_positions[player_id][i] < POS_GOAL_START) {
+        if (pawn_positions[to_int(player_id)][i] < POS_GOAL_START) {
             return false; // At least one pawn not yet in goal
         }
     }
@@ -21,8 +21,7 @@ bool Game::check_for_win(const int player_id) const {
 }
 
 void Game::print_game_state(const int roll) const {
-    std::stringstream ss;
-    const char p_char = 'A' + current_player;
+    const char p_char = to_char(current_player);
 
     // 1. Home/Goal status for each player
     for (int p = 0; p < 4; ++p) {
@@ -32,46 +31,47 @@ void Game::print_game_state(const int roll) const {
             if (pawn_positions[p][i] == POS_HOME) home++;
             else if (pawn_positions[p][i] >= POS_GOAL_START) goal++;
         }
-        ss << "P" << static_cast<char>('A' + p) << "(H:" << home << ",G:" << goal << ") ";
+        std::print("P{}(H:{},G:{}) ", to_char(to_player_id(p)), home, goal);
     }
 
-    ss << "| Track: [";
+    std::print("| Track: [");
 
     // 2. Track overview
     std::array<char, TRACK_SIZE> track{};
     track.fill('.');
     for (int p = 0; p < 4; ++p) {
-        const char player_char = 'A' + p;
+        const char player_char = to_char(to_player_id(p));
         for (int i = 0; i < 4; ++i) {
-            if (const int abs_pos = get_absolute_position(p, i); abs_pos != -1) {
+            if (const int abs_pos = get_absolute_position(to_player_id(p), i); abs_pos != -1) {
                 // 'X' if the field is occupied multiple times, otherwise player letter
                 track[abs_pos] = (track[abs_pos] == '.' ? player_char : 'X');
             }
         }
     }
-    for (const char c : track) ss << c;
-    ss << "] | ";
+    for (const char c : track) std::print("{}", c);
+    std::print("] | ");
 
     // 3. Current player
-    ss << "Turn: " << p_char << " Roll: " << roll;
-    std::cout << ss.str() << std::endl;
+    std::println("Turn: {} Roll: {}", p_char, roll);
 }
 
-int Game::get_absolute_position(const int player, const int pawn_index) const {
-    const int rel_pos = pawn_positions[player][pawn_index];
+int Game::get_absolute_position(const PlayerID player, const int pawn_index) const {
+    const int player_idx = to_int(player);
+    const int rel_pos = pawn_positions[player_idx][pawn_index];
     if (rel_pos < POS_TRACK_START || rel_pos >= POS_GOAL_START) {
         return -1; // Not on the main track
     }
-    return (PLAYER_START_SQUARE[player] + rel_pos) % TRACK_SIZE;
+    return (PLAYER_START_SQUARE[player_idx] + rel_pos) % TRACK_SIZE;
 }
 
-std::vector<int> Game::get_pawns_that_can_leave_home(const int player_id) const {
+std::vector<int> Game::get_pawns_that_can_leave_home(const PlayerID player_id) const {
     std::vector<int> pawns;
+    const int player_idx = to_int(player_id);
 
     // Check if own pawn blocks the start field
     bool start_blocked = false;
     for (int j = 0; j < 4; ++j) {
-        if (pawn_positions[player_id][j] == POS_TRACK_START) {
+        if (pawn_positions[player_idx][j] == POS_TRACK_START) {
             start_blocked = true;
             break;
         }
@@ -80,7 +80,7 @@ std::vector<int> Game::get_pawns_that_can_leave_home(const int player_id) const 
     // If start is free, find the first pawn in home
     if (!start_blocked) {
         for (int i = 0; i < 4; ++i) {
-            if (pawn_positions[player_id][i] == POS_HOME) {
+            if (pawn_positions[player_idx][i] == POS_HOME) {
                 pawns.push_back(i);
                 break; // We can only put ONE pawn on the start field at a time
             }
@@ -90,11 +90,12 @@ std::vector<int> Game::get_pawns_that_can_leave_home(const int player_id) const 
     return pawns;
 }
 
-std::vector<int> Game::get_valid_moves_on_track(const int player_id, const int roll) const {
+std::vector<int> Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const {
     std::vector<int> pawns;
+    const int player_idx = to_int(player_id);
 
     for (int i = 0; i < 4; ++i) {
-        int pos = pawn_positions[player_id][i];
+        int pos = pawn_positions[player_idx][i];
         if (pos == POS_HOME) continue; // Is in home (handled separately)
 
         int new_pos = pos + roll;
@@ -104,7 +105,7 @@ std::vector<int> Game::get_valid_moves_on_track(const int player_id, const int r
         bool blocked_by_self = false;
         for (int j = 0; j < 4; ++j) {
             if (i == j) continue;
-            if (pawn_positions[player_id][j] == new_pos) {
+            if (pawn_positions[player_idx][j] == new_pos) {
                 blocked_by_self = true;
                 break;
             }
@@ -116,7 +117,7 @@ std::vector<int> Game::get_valid_moves_on_track(const int player_id, const int r
     return pawns;
 }
 
-std::vector<int> Game::get_all_valid_moves(const int player_id, const int roll) const {
+std::vector<int> Game::get_all_valid_moves(const PlayerID player_id, const int roll) const {
     std::vector<int> valid_moves;
 
     // If rolled a 6, check pawns that can leave home
@@ -131,13 +132,15 @@ std::vector<int> Game::get_all_valid_moves(const int player_id, const int roll) 
     return valid_moves;
 }
 
-void Game::check_and_apply_capture(const int moving_player, const int landing_abs_pos) {
+void Game::check_and_apply_capture(const PlayerID moving_player, const int landing_abs_pos) {
+    const int moving_player_idx = to_int(moving_player);
+
     for (int p = 0; p < 4; ++p) {
-        if (p == moving_player) continue; // Don't capture own pawns
+        if (p == moving_player_idx) continue; // Don't capture own pawns
 
         for (int i = 0; i < 4; ++i) {
             // Check if another player's pawn is on this field
-            if (get_absolute_position(p, i) == landing_abs_pos) {
+            if (get_absolute_position(to_player_id(p), i) == landing_abs_pos) {
 
                 // IMPORTANT: A player's start field is a "safe zone"
                 // You cannot capture anyone on their *own* start field.
@@ -149,10 +152,12 @@ void Game::check_and_apply_capture(const int moving_player, const int landing_ab
     }
 }
 
-void Game::execute_move(const int player_id, const int pawn_index, const int roll) {
-    if (const int old_pos = pawn_positions[player_id][pawn_index]; old_pos == POS_HOME) {
+void Game::execute_move(const PlayerID player_id, const int pawn_index, const int roll) {
+    const int player_idx = to_int(player_id);
+
+    if (const int old_pos = pawn_positions[player_idx][pawn_index]; old_pos == POS_HOME) {
         // Move pawn out of home
-        pawn_positions[player_id][pawn_index] = POS_TRACK_START;
+        pawn_positions[player_idx][pawn_index] = POS_TRACK_START;
 
         // Check if someone is captured on the start field
         const int abs_pos = get_absolute_position(player_id, pawn_index);
@@ -160,7 +165,7 @@ void Game::execute_move(const int player_id, const int pawn_index, const int rol
     } else {
         // Move pawn normally
         const int new_pos = old_pos + roll;
-        pawn_positions[player_id][pawn_index] = new_pos;
+        pawn_positions[player_idx][pawn_index] = new_pos;
 
         // Only capture if landing on the main track (not in goal)
         if (new_pos < POS_GOAL_START) {

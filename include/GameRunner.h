@@ -10,11 +10,11 @@ class Game;
  * - Coordinating game start and completion
  * - User interaction (prompts, results)
  */
-class GameRunner {
+class GameRunner final {
 public:
     /**
-     * @brief Runs a complete game with 4 players.
+     * @brief Runs a complete game with 4 players using the random strategy.
      * @return Exit code (0 for success)
      */
-    static int run();
+    static int run_random();
 };

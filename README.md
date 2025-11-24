@@ -134,23 +134,3 @@ thread_local std::mt19937 rng;
 thread_local std::uniform_int_distribution<int> move_dist;
 move_dist.param(/* new range */);  // Avoid allocation
 ```
-
----
-
-## 📈 Performance Metrics
-
-### Complexity Improvements
-
-| Operation         | Old            | New               | Improvement      |
-|-------------------|----------------|-------------------|------------------|
-| Capture checking  | O(n×m) = O(16) | O(1)              | 16× faster       |
-| Position printing | O(n×m) = O(16) | O(40) single pass | ~2× faster       |
-| Move validation   | O(n)           | O(n)              | Same (optimized) |
-
-### Memory Improvements
-
-| Component         | Old                 | New                      | Savings             |
-|-------------------|---------------------|--------------------------|---------------------|
-| Strategy instance | 2504 bytes          | 8 bytes                  | 99.6%               |
-| Position tracking | Recalculated        | Cached (160 bytes)       | Eliminates recalc   |
-| String formatting | `stringstream` heap | Stack-based `std::print` | Reduced allocations |

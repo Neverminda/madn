@@ -1,7 +1,6 @@
 # Mensch Ärgere Dich Nicht / Ludo
 
-A high-performance, thread-safe implementation of the classic Ludo (Mensch ärgere dich nicht) board game, modernized 
-using C++23 features.
+Assignment for the Advanced Software Development course at University Pforzheim.
 
 ---
 

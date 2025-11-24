@@ -66,6 +66,7 @@ int Game::get_absolute_position(const PlayerID player, const int pawn_index) con
 
 std::vector<int> Game::get_pawns_that_can_leave_home(const PlayerID player_id) const {
     std::vector<int> pawns;
+    pawns.reserve(4);
     const int player_idx = to_int(player_id);
 
     // Check if own pawn blocks the start field
@@ -92,13 +93,14 @@ std::vector<int> Game::get_pawns_that_can_leave_home(const PlayerID player_id) c
 
 std::vector<int> Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const {
     std::vector<int> pawns;
+    pawns.reserve(4);
     const int player_idx = to_int(player_id);
 
     for (int i = 0; i < 4; ++i) {
-        int pos = pawn_positions[player_idx][i];
+        const int pos = pawn_positions[player_idx][i];
         if (pos == POS_HOME) continue; // Is in home (handled separately)
 
-        int new_pos = pos + roll;
+        const int new_pos = pos + roll;
         if (new_pos > POS_GOAL_END) continue; // Would overshoot the goal, illegal
 
         // Check if own pawn is blocking the target field
@@ -119,15 +121,32 @@ std::vector<int> Game::get_valid_moves_on_track(const PlayerID player_id, const 
 
 std::vector<int> Game::get_all_valid_moves(const PlayerID player_id, const int roll) const {
     std::vector<int> valid_moves;
+    valid_moves.reserve(8);
 
     // If rolled a 6, check pawns that can leave home
-    if (roll == 6) {
-        valid_moves = get_pawns_that_can_leave_home(player_id);
-    }
+    if (roll == 6) valid_moves = get_pawns_that_can_leave_home(player_id);
 
     // Check pawns on the track that can move
-    std::vector<int> track_moves = get_valid_moves_on_track(player_id, roll);
-    valid_moves.insert(valid_moves.end(), track_moves.begin(), track_moves.end());
+    const int player_idx = to_int(player_id);
+    for (int i = 0; i < 4; ++i) {
+        const int pos = pawn_positions[player_idx][i];
+        if (pos == POS_HOME) continue;
+
+        const int new_pos = pos + roll;
+        if (new_pos > POS_GOAL_END) continue;
+
+        // Check if own pawn is blocking the target field
+        bool blocked_by_self = false;
+        for (int j = 0; j < 4; ++j) {
+            if (i == j) continue;
+            if (pawn_positions[player_idx][j] == new_pos) {
+                blocked_by_self = true;
+                break;
+            }
+        }
+
+        if (!blocked_by_self) valid_moves.push_back(i);
+    }
 
     return valid_moves;
 }

@@ -4,6 +4,7 @@
 #include "RandomStrategy.h"
 #include <thread>
 #include <vector>
+#include <array>
 #include <memory>
 #include <random>
 #include <iostream>
@@ -25,10 +26,9 @@ int GameRunner::run_random() {
     players.emplace_back(PlayerID::D, std::make_unique<RandomStrategy>(std::random_device{}()));
 
     // Start player threads
-    std::vector<std::thread> threads;
-    threads.reserve(players.size());
-    for (auto& player : players) {
-        threads.emplace_back(&Player::play_game, &player, std::ref(game));
+    std::array<std::thread, 4> threads;
+    for (size_t i = 0; i < players.size(); ++i) {
+        threads[i] = std::thread(&Player::play_game, &players[i], std::ref(game));
     }
 
     // Wait until all threads (players) are finished

@@ -13,7 +13,8 @@ class RandomStrategy final : public PlayerStrategy {
 public:
     explicit RandomStrategy(int seed);
 
-    bool make_move(Game& game, PlayerID player_id, int roll) override;
+    auto make_move(Game &game, PlayerID player_id, int roll)
+    -> bool override;
 private:
     std::mt19937 rng;
 };

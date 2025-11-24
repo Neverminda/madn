@@ -28,7 +28,9 @@ public:
      */
     void play_game(Game& game);
 
-    [[nodiscard]] PlayerID get_id() const { return player_id; }
+    [[nodiscard]]
+    auto get_id() const
+    -> PlayerID { return player_id; }
 
 private:
     PlayerID player_id;

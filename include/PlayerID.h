@@ -16,7 +16,7 @@ enum class PlayerID { A = 0, B = 1, C = 2, D = 3 };
  */
 inline auto to_char(PlayerID id)
 -> char {
-    constexpr std::array<char, 4> labels = {'A', 'B', 'C', 'D'};
+    constexpr std::array labels = {'A', 'B', 'C', 'D'};
     return labels[static_cast<int>(id)];
 }
 

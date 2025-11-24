@@ -5,7 +5,6 @@
 #include <thread>
 #include <vector>
 #include <array>
-#include <memory>
 #include <random>
 #include <iostream>
 #include <print>
@@ -19,19 +18,20 @@ int GameRunner::run_random() {
     std::println("Press Enter to start the simulation...");
     std::cin.get();
 
-    // Create 4 players with random strategies
-    std::vector<Player> players;
+    // Create 4 players with random strategies (compile-time polymorphism!)
+    using RandomPlayer = Player<RandomStrategy>;
+    std::vector<RandomPlayer> players;
     players.reserve(4);
-    players.emplace_back(PlayerID::A, std::make_unique<RandomStrategy>(std::random_device{}()));
-    players.emplace_back(PlayerID::B, std::make_unique<RandomStrategy>(std::random_device{}()));
-    players.emplace_back(PlayerID::C, std::make_unique<RandomStrategy>(std::random_device{}()));
-    players.emplace_back(PlayerID::D, std::make_unique<RandomStrategy>(std::random_device{}()));
+    players.emplace_back(PlayerID::A, RandomStrategy{static_cast<int>(std::random_device{}())});
+    players.emplace_back(PlayerID::B, RandomStrategy{static_cast<int>(std::random_device{}())});
+    players.emplace_back(PlayerID::C, RandomStrategy{static_cast<int>(std::random_device{}())});
+    players.emplace_back(PlayerID::D, RandomStrategy{static_cast<int>(std::random_device{}())});
 
     // Start player threads
     std::array<std::thread, 4> threads;
     auto indices = std::views::iota(size_t{0}, players.size());
     std::ranges::for_each(indices, [&](const size_t i) -> void {
-        threads[i] = std::thread(&Player::play_game, &players[i], std::ref(game));
+        threads[i] = std::thread(&RandomPlayer::play_game, &players[i], std::ref(game));
     });
 
     // Wait until all threads (players) are finished

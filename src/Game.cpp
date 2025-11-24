@@ -62,7 +62,7 @@ int Game::get_absolute_position(const PlayerID player, const int pawn_index) con
     return (PLAYER_START_SQUARE[player_idx] + rel_pos) % TRACK_SIZE;
 }
 
-std::vector<int> Game::get_pawns_that_can_leave_home(const PlayerID player_id) const {
+auto Game::get_pawns_that_can_leave_home(const PlayerID player_id) const -> std::vector<int> {
     std::vector<int> pawns;
     pawns.reserve(4);
     const int player_idx = to_int(player_id);
@@ -79,7 +79,7 @@ std::vector<int> Game::get_pawns_that_can_leave_home(const PlayerID player_id) c
     return pawns;
 }
 
-std::vector<int> Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const {
+auto Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const -> std::vector<int> {
     std::vector<int> pawns;
     pawns.reserve(4);
     const int player_idx = to_int(player_id);
@@ -99,7 +99,7 @@ std::vector<int> Game::get_valid_moves_on_track(const PlayerID player_id, const 
     return pawns;
 }
 
-std::vector<int> Game::get_all_valid_moves(const PlayerID player_id, const int roll) const {
+auto Game::get_all_valid_moves(const PlayerID player_id, const int roll) const -> std::vector<int> {
     std::vector<int> valid_moves;
     valid_moves.reserve(8);
 

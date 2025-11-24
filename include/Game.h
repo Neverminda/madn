@@ -6,6 +6,8 @@
 #include <condition_variable>
 #include <functional>
 #include <vector>
+#include <concepts>
+#include <ranges>
 
 #include "constants.h"
 

@@ -35,7 +35,7 @@ void Player::play_game(Game& game) {
         // Check for win
         if (game.check_for_win(player_id)) {
             game.game_over = true;
-            std::println("\n*** PLAYER {} HAS WON! ***", p_char);
+            std::print("\n\n*** PLAYER {} HAS WON! ***\n", p_char);
         }
 
         // --- Pass turn ---

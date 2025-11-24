@@ -9,12 +9,11 @@
  * Chooses a random valid move from all available options.
  * Delegates move validation and execution to the Game class.
  */
-class RandomStrategy : public PlayerStrategy {
-private:
-    std::mt19937 rng;
-
+class RandomStrategy final : public PlayerStrategy {
 public:
     explicit RandomStrategy(int seed);
 
-    bool make_move(Game& game, int player_id, int roll) override;
+    bool make_move(Game& game, PlayerID player_id, int roll) override;
+private:
+    std::mt19937 rng;
 };

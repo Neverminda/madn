@@ -2,5 +2,5 @@
 
 int main()
 {
-    return GameRunner::run();
+    return GameRunner::run_random();
 }

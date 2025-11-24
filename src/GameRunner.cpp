@@ -7,22 +7,26 @@
 #include <memory>
 #include <random>
 #include <iostream>
+#include <print>
 
-int GameRunner::run() {
+int GameRunner::run_random() {
     Game game;
 
-    std::cout << "Ludo Simulation in C++" << std::endl;
-    std::cout << "Press Enter to start the simulation..." << std::endl;
+    std::println("Ludo Simulation with 4 players using the Random-Strategy");
+    std::println("Press Enter to start the simulation...");
     std::cin.get();
 
     // Create 4 players with random strategies
     std::vector<Player> players;
-    for (int i = 0; i < 4; ++i) {
-        players.emplace_back(i, std::make_unique<RandomStrategy>(std::random_device{}() + i));
-    }
+    players.reserve(4);
+    players.emplace_back(PlayerID::A, std::make_unique<RandomStrategy>(std::random_device{}()));
+    players.emplace_back(PlayerID::B, std::make_unique<RandomStrategy>(std::random_device{}()));
+    players.emplace_back(PlayerID::C, std::make_unique<RandomStrategy>(std::random_device{}()));
+    players.emplace_back(PlayerID::D, std::make_unique<RandomStrategy>(std::random_device{}()));
 
     // Start player threads
     std::vector<std::thread> threads;
+    threads.reserve(players.size());
     for (auto& player : players) {
         threads.emplace_back(&Player::play_game, &player, std::ref(game));
     }
@@ -32,6 +36,6 @@ int GameRunner::run() {
         t.join();
     }
 
-    std::cout << "Game ended." << std::endl;
+    std::println("Game ended.");
     return 0;
 }

@@ -15,13 +15,20 @@ Game::Game()
         player_pawns.fill(POS_HOME);
         player_pawns[0] = POS_TRACK_START;
     }
+
+    // Initialize position_lookup for the starting pawns
+    for (int p = 0; p < 4; ++p) {
+        const int abs_pos = PLAYER_START_SQUARE[p];
+        position_lookup[abs_pos] = std::make_pair(p, 0);
+    }
 }
 
-bool Game::check_for_win(const PlayerID player_id) const {
-    return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal);
-}
+auto Game::check_for_win(const PlayerID player_id) const
+-> bool { return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal); }
 
-void Game::print_game_state(const int roll) const {
+auto Game::print_game_state(const int roll) const
+-> void
+{
     const char p_char = to_char(current_player);
 
     // 1. Home/Goal status for each player
@@ -33,16 +40,15 @@ void Game::print_game_state(const int roll) const {
 
     std::print("| Track: [");
 
-    // 2. Track overview
+    // 2. Track overview - use cached position_lookup for O(1) access
     std::array<char, TRACK_SIZE> track{};
     track.fill('.');
-    for (int p = 0; p < 4; ++p) {
-        const char player_char = to_char(to_player_id(p));
-        for (int i = 0; i < 4; ++i) {
-            if (const int abs_pos = get_absolute_position(to_player_id(p), i); abs_pos != -1) {
-                // 'X' if the field is occupied multiple times, otherwise player letter
-                track[abs_pos] = (track[abs_pos] == '.' ? player_char : 'X');
-            }
+    for (int pos = 0; pos < TRACK_SIZE; ++pos) {
+        if (const auto& occupant = position_lookup[pos]) {
+            const auto [player_idx, pawn_idx] = *occupant;
+            const char player_char = to_char(to_player_id(player_idx));
+            // 'X' if the field is occupied multiple times, otherwise player letter
+            track[pos] = (track[pos] == '.' ? player_char : 'X');
         }
     }
     for (const char c : track) std::print("{}", c);
@@ -52,7 +58,9 @@ void Game::print_game_state(const int roll) const {
     std::println("Turn: {} Roll: {}", p_char, roll);
 }
 
-int Game::get_absolute_position(const PlayerID player, const int pawn_index) const {
+auto Game::get_absolute_position(const PlayerID player, const int pawn_index) const
+-> int
+{
     const int player_idx = to_int(player);
     const int rel_pos = pawn_positions[player_idx][pawn_index];
 
@@ -62,7 +70,9 @@ int Game::get_absolute_position(const PlayerID player, const int pawn_index) con
     return (PLAYER_START_SQUARE[player_idx] + rel_pos) % TRACK_SIZE;
 }
 
-auto Game::get_pawns_that_can_leave_home(const PlayerID player_id) const -> std::vector<int> {
+auto Game::get_pawns_that_can_leave_home(const PlayerID player_id) const
+-> std::vector<int>
+{
     std::vector<int> pawns;
     pawns.reserve(4);
     const int player_idx = to_int(player_id);
@@ -79,7 +89,9 @@ auto Game::get_pawns_that_can_leave_home(const PlayerID player_id) const -> std:
     return pawns;
 }
 
-auto Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const -> std::vector<int> {
+auto Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) const
+-> std::vector<int>
+{
     std::vector<int> pawns;
     pawns.reserve(4);
     const int player_idx = to_int(player_id);
@@ -99,7 +111,9 @@ auto Game::get_valid_moves_on_track(const PlayerID player_id, const int roll) co
     return pawns;
 }
 
-auto Game::get_all_valid_moves(const PlayerID player_id, const int roll) const -> std::vector<int> {
+auto Game::get_all_valid_moves(const PlayerID player_id, const int roll) const
+-> std::vector<int>
+{
     std::vector<int> valid_moves;
     valid_moves.reserve(8);
 
@@ -123,23 +137,49 @@ auto Game::get_all_valid_moves(const PlayerID player_id, const int roll) const -
     return valid_moves;
 }
 
-void Game::check_and_apply_capture(const PlayerID moving_player, const int landing_abs_pos) {
+auto Game::check_and_apply_capture(const PlayerID moving_player, const int landing_abs_pos)
+-> void
+{
     const int moving_player_idx = to_int(moving_player);
 
-    for (int p = 0; p < 4; ++p) {
-        if (p == moving_player_idx) continue; // Don't capture own pawns
+    // O(1) lookup: check if there's a pawn at the landing position
+    if (const auto& occupant = position_lookup[landing_abs_pos]) {
+        const auto [other_player_idx, other_pawn_idx] = *occupant;
 
-        for (int i = 0; i < 4; ++i) {
-            // Check if another player's pawn is on this field
-            if (get_absolute_position(to_player_id(p), i) == landing_abs_pos) {
-                // IMPORTANT: A player's start field is a safe zone, you cannot capture anyone on their own start
-                if (landing_abs_pos != PLAYER_START_SQUARE[p]) pawn_positions[p][i] = POS_HOME; // Back to home
-            }
-        }
+        // Don't capture own pawns
+        if (other_player_idx == moving_player_idx) return;
+
+        // IMPORTANT: A player's start field is a safe zone, you cannot capture anyone on their own start
+        if (landing_abs_pos == PLAYER_START_SQUARE[other_player_idx]) return;
+
+        // Capture: send the pawn back to home
+        pawn_positions[other_player_idx][other_pawn_idx] = POS_HOME;
+        // Clear from lookup (will be overwritten by the moving pawn anyway)
+        position_lookup[landing_abs_pos] = std::nullopt;
     }
 }
 
-void Game::execute_move(const PlayerID player_id, const int pawn_index, const int roll) {
+auto Game::update_position_lookup(const PlayerID player_id, const int pawn_index, const int old_rel_pos, const int new_rel_pos)
+-> void
+{
+    const int player_idx = to_int(player_id);
+
+    // Remove the old position from lookup (if it was on the main track)
+    if (old_rel_pos >= POS_TRACK_START && old_rel_pos < POS_GOAL_START) {
+        const int old_abs = (PLAYER_START_SQUARE[player_idx] + old_rel_pos) % TRACK_SIZE;
+        position_lookup[old_abs] = std::nullopt;
+    }
+
+    // Add the new position to lookup (if it's on the main track)
+    if (new_rel_pos >= POS_TRACK_START && new_rel_pos < POS_GOAL_START) {
+        const int new_abs = (PLAYER_START_SQUARE[player_idx] + new_rel_pos) % TRACK_SIZE;
+        position_lookup[new_abs] = std::make_pair(player_idx, pawn_index);
+    }
+}
+
+auto Game::execute_move(const PlayerID player_id, const int pawn_index, const int roll)
+-> void
+{
     const int player_idx = to_int(player_id);
 
     if (const int old_pos = pawn_positions[player_idx][pawn_index]; is_at_home(old_pos)) {
@@ -149,10 +189,16 @@ void Game::execute_move(const PlayerID player_id, const int pawn_index, const in
         // Check if someone is captured on the start field
         const int abs_pos = get_absolute_position(player_id, pawn_index);
         check_and_apply_capture(player_id, abs_pos);
+
+        // Update lookup table
+        update_position_lookup(player_id, pawn_index, old_pos, POS_TRACK_START);
     } else {
         // Move pawn normally
         const int new_pos = old_pos + roll;
         pawn_positions[player_idx][pawn_index] = new_pos;
+
+        // Update lookup table
+        update_position_lookup(player_id, pawn_index, old_pos, new_pos);
 
         // Only capture if landing on the main track (not in goal)
         if (!is_in_goal(new_pos)) {

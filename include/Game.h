@@ -8,6 +8,7 @@
 #include <vector>
 #include <concepts>
 #include <ranges>
+#include <optional>
 
 #include "constants.h"
 
@@ -20,6 +21,13 @@ public:
      * @brief Stores the positions of all pawns: [Player][Pawn_Index]
      */
     std::array<std::array<int, 4>, 4> pawn_positions;
+
+    /**
+     * @brief Reverse lookup: maps absolute track position -> (player_idx, pawn_idx)
+     * - Enables O(1) capture checking instead of O(n*m) nested loops
+     */
+    std::array<std::optional<std::pair<int, int>>, TRACK_SIZE> position_lookup;
+
     PlayerID current_player;
     bool is_game_over;
 
@@ -97,6 +105,12 @@ public:
     -> void;
 
 private:
+    /**
+     * @brief Updates position_lookup when a pawn moves
+     */
+    auto update_position_lookup(PlayerID player_id, int pawn_index, int old_rel_pos, int new_rel_pos)
+    -> void;
+
     [[nodiscard]]
     static constexpr auto is_in_goal(const int pos)
     -> bool { return pos >= POS_GOAL_START; }

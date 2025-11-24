@@ -11,7 +11,9 @@
 #include <algorithm>
 #include <ranges>
 
-int GameRunner::run_random() {
+auto GameRunner::run_random()
+-> int
+{
     Game game;
 
     std::println("Ludo Simulation with 4 players using the Random-Strategy");

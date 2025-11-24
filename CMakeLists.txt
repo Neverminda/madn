@@ -12,6 +12,7 @@ set(SOURCES
     src/Game.cpp
     src/GameRunner.cpp
     src/Player.cpp
+    src/RandomStrategy.cpp
 )
 
 # Create executable

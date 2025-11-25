@@ -1,16 +1,13 @@
 #pragma once
 
+#include "constants.h"
 #include "PlayerID.h"
 #include <array>
 #include <mutex>
 #include <condition_variable>
 #include <functional>
 #include <vector>
-#include <concepts>
-#include <ranges>
 #include <optional>
-
-#include "constants.h"
 
 /**
  * @brief Contains the entire shared game state and synchronization.
@@ -30,6 +27,7 @@ public:
 
     PlayerID current_player;
     bool is_game_over;
+    std::optional<PlayerID> winner;
 
     // Synchronization tools
     std::mutex mtx;
@@ -104,6 +102,11 @@ public:
     auto execute_move(PlayerID player_id, int pawn_index, int roll)
     -> void;
 
+    /**
+     * @brief Prints the winner of the game.
+     */
+    auto announce_winner() const
+    -> void;
 private:
     /**
      * @brief Updates position_lookup when a pawn moves

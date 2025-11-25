@@ -24,7 +24,8 @@ Game::Game()
 }
 
 auto Game::check_for_win(const PlayerID player_id) const
--> bool {
+-> bool
+{
     return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal);
 }
 
@@ -210,5 +211,14 @@ auto Game::execute_move(const PlayerID player_id, const int pawn_index, const in
             const int abs_pos = get_absolute_position(player_id, pawn_index);
             check_and_apply_capture(player_id, abs_pos);
         }
+    }
+}
+
+auto Game::announce_winner() const
+-> void
+{
+    if constexpr (ENABLE_OUTPUT) {
+        if (!winner) return;
+        std::println("\n*** PLAYER {} HAS WON! ***\n", to_char(*winner));
     }
 }

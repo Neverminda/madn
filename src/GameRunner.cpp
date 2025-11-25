@@ -34,6 +34,8 @@ auto GameRunner::run_random()
     // Wait until all threads (players) are finished
     std::ranges::for_each(threads, [](std::thread& t) -> void { t.join(); });
 
+    game.announce_winner();
+
     return 0;
 }
 

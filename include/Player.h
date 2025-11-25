@@ -55,20 +55,17 @@ public:
             // --- It's our turn ---
             const int roll = dice();
             const bool earned_another_turn = (roll == 6);
-
-            // Delegate the move to the strategy (no virtual call!)
             strategy.make_move(game, player_id, roll);
             game.print_game_state(roll);
 
             // Check for win
             if (game.check_for_win(player_id)) {
+                game.winner = player_id;
                 game.is_game_over = true;
-                if constexpr (ENABLE_OUTPUT) std::println("\n*** PLAYER {} HAS WON! ***\n", p_char); // TODO: Game class should announce winner
             }
 
             // --- Pass turn ---
-            if (!earned_another_turn || game.is_game_over)
-                game.current_player = next_player(game.current_player);
+            if (!earned_another_turn || game.is_game_over) game.current_player = next_player(game.current_player);
 
             lock.unlock();
             game.cv.notify_all();

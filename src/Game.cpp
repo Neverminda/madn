@@ -3,6 +3,7 @@
 #include <array>
 #include <algorithm>
 #include <print>
+#include <string>
 
 Game::Game()
     : pawn_positions()
@@ -30,20 +31,21 @@ auto Game::check_for_win(const PlayerID player_id) const
 auto Game::print_game_state(const int roll) const
 -> void
 {
-    const char p_char = to_char(current_player);
+    std::string output;
+    output.reserve(128);
 
     // 1. Home/Goal status for each player
     for (int p = 0; p < 4; ++p) {
         const auto home = static_cast<int>(std::ranges::count_if(pawn_positions[p], is_at_home));
         const auto goal = static_cast<int>(std::ranges::count_if(pawn_positions[p], is_in_goal));
-        if constexpr (EnableOutput) std::print("P{}(H:{},G:{}) ", to_char(to_player_id(p)), home, goal);
+        output += std::format("P{}(H:{},G:{}) ", to_char(to_player_id(p)), home, goal);
     }
-
-    if constexpr (EnableOutput) std::print("| Track: [");
 
     // 2. Track overview - use cached position_lookup for O(1) access
     std::array<char, TRACK_SIZE> track{};
     track.fill('.');
+
+    output += "| Track: [";
     for (int pos = 0; pos < TRACK_SIZE; ++pos) {
         if (const auto& occupant = position_lookup[pos]) {
             const auto [player_idx, pawn_idx] = *occupant;
@@ -52,13 +54,13 @@ auto Game::print_game_state(const int roll) const
             track[pos] = (track[pos] == '.' ? player_char : 'X');
         }
     }
-    for (const char c : track) {
-        if constexpr (EnableOutput) std::print("{}", c);
-    }
-    if constexpr (EnableOutput) std::print("] | ");
+    for (const char c : track) output += c;
+    output += "] | ";
 
     // 3. Current player
-    if constexpr (EnableOutput) std::println("Turn: {} Roll: {}", p_char, roll);
+    output += std::format("Turn: {} Roll: {}", to_char(current_player), roll);
+
+    if constexpr (ENABLE_OUTPUT) std::println("{}", output);
 }
 
 auto Game::get_absolute_position(const PlayerID player, const int pawn_index) const
@@ -155,7 +157,7 @@ auto Game::check_and_apply_capture(const PlayerID moving_player, const int landi
         // IMPORTANT: A player's start field is a safe zone, you cannot capture anyone on their own start
         if (landing_abs_pos == PLAYER_START_SQUARE[other_player_idx]) return;
 
-        // Capture: send the pawn back to home
+        // Capture: send the pawn back to the home
         pawn_positions[other_player_idx][other_pawn_idx] = POS_HOME;
         // Clear from lookup (will be overwritten by the moving pawn anyway)
         position_lookup[landing_abs_pos] = std::nullopt;

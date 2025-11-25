@@ -63,7 +63,7 @@ public:
             // Check for win
             if (game.check_for_win(player_id)) {
                 game.is_game_over = true;
-                if constexpr (EnableOutput) std::println("\n*** PLAYER {} HAS WON! ***\n", p_char); // TODO: Game class should announce winner
+                if constexpr (ENABLE_OUTPUT) std::println("\n*** PLAYER {} HAS WON! ***\n", p_char); // TODO: Game class should announce winner
             }
 
             // --- Pass turn ---

@@ -11,4 +11,4 @@ constexpr int TRACK_SIZE        = 40;   // Size of the field
 constexpr std::array PLAYER_START_SQUARE = {0, 10, 20, 30}; // The absolute starting positions on the 40-space field
 
 // Output control
-constexpr bool EnableOutput = false; //  If this is set to false, suppress all game-related output code at compile-time
+constexpr bool ENABLE_OUTPUT = true; //  If this is set to false, suppress all game-related output code at compile-time

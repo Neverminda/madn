@@ -6,19 +6,14 @@
 #include <vector>
 #include <array>
 #include <random>
-#include <iostream>
-#include <print>
 #include <algorithm>
 #include <ranges>
+#include <chrono>
 
 auto GameRunner::run_random()
 -> int
 {
     Game game;
-
-    std::println("Ludo Simulation with 4 players using the Random-Strategy");
-    std::println("Press Enter to start the simulation...");
-    std::cin.get();
 
     // Create 4 players with random strategies (compile-time polymorphism!)
     using RandomPlayer = Player<RandomStrategy>;
@@ -39,6 +34,20 @@ auto GameRunner::run_random()
     // Wait until all threads (players) are finished
     std::ranges::for_each(threads, [](std::thread& t) -> void { t.join(); });
 
-    std::println("Game ended.");
+    return 0;
+}
+
+auto GameRunner::random_benchmark(const int num_games)
+-> int
+{
+    const auto start = std::chrono::high_resolution_clock::now();
+
+    for (int i = 0; i < num_games; ++i) {
+        run_random();
+    }
+
+    const auto end = std::chrono::high_resolution_clock::now();
+    const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
     return 0;
 }

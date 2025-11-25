@@ -17,4 +17,11 @@ public:
      * @return Exit code (0 for success)
      */
     static int run_random();
+
+    /**
+     * @brief Benchmarks multiple games (all players with random strategy) and reports timing statistics.
+     * @param num_games Number of games to run
+     * @return Exit code (0 for success)
+     */
+    static int random_benchmark(int num_games = 1000);
 };

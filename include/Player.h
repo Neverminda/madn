@@ -13,7 +13,7 @@ class Game;
  *
  * Template class using compile-time polymorphism via concepts.
  * Manages player state and coordinates with a strategy for decision-making.
- * Each player runs in its own thread and takes turns based on game state.
+ * Each player runs in its own thread and takes turns based on the game state.
  *
  * Template parameters enable both strategy pattern and testable dice injection.
  * Player accepts any PlayerStrategy - individual strategies can enforce
@@ -63,7 +63,7 @@ public:
             // Check for win
             if (game.check_for_win(player_id)) {
                 game.is_game_over = true;
-                std::println("\n*** PLAYER {} HAS WON! ***", p_char);
+                if constexpr (EnableOutput) std::println("\n*** PLAYER {} HAS WON! ***\n", p_char); // TODO: Game class should announce winner
             }
 
             // --- Pass turn ---

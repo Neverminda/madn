@@ -40,14 +40,22 @@ auto GameRunner::run_random()
 auto GameRunner::random_benchmark(const int num_games)
 -> int
 {
+    std::println("=== Ludo Benchmark ===");
+    std::println("Running {} games...\n", num_games);
+
     const auto start = std::chrono::high_resolution_clock::now();
 
-    for (int i = 0; i < num_games; ++i) {
-        run_random();
-    }
+    for (int i = 0; i < num_games; ++i) run_random();
 
     const auto end = std::chrono::high_resolution_clock::now();
     const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    // Print statistics
+    std::println("=== Benchmark Results ===");
+    std::println("Total games:    {}", num_games);
+    std::println("Total time:     {} ms", duration.count());
+    std::println("Average time:   {:.2f} ms/game", static_cast<double>(duration.count()) / num_games);
+    std::println("Games per sec:  {:.2f} games/s", (num_games * 1000.0) / static_cast<double>(duration.count()));
 
     return 0;
 }

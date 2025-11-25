@@ -1,9 +1,8 @@
 #include "Game.h"
 #include "constants.h"
-#include <print>
 #include <array>
-#include <ranges>
 #include <algorithm>
+#include <print>
 
 Game::Game()
     : pawn_positions()
@@ -24,7 +23,9 @@ Game::Game()
 }
 
 auto Game::check_for_win(const PlayerID player_id) const
--> bool { return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal); }
+-> bool {
+    return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal);
+}
 
 auto Game::print_game_state(const int roll) const
 -> void
@@ -35,10 +36,10 @@ auto Game::print_game_state(const int roll) const
     for (int p = 0; p < 4; ++p) {
         const auto home = static_cast<int>(std::ranges::count_if(pawn_positions[p], is_at_home));
         const auto goal = static_cast<int>(std::ranges::count_if(pawn_positions[p], is_in_goal));
-        std::print("P{}(H:{},G:{}) ", to_char(to_player_id(p)), home, goal);
+        if constexpr (EnableOutput) std::print("P{}(H:{},G:{}) ", to_char(to_player_id(p)), home, goal);
     }
 
-    std::print("| Track: [");
+    if constexpr (EnableOutput) std::print("| Track: [");
 
     // 2. Track overview - use cached position_lookup for O(1) access
     std::array<char, TRACK_SIZE> track{};
@@ -51,11 +52,13 @@ auto Game::print_game_state(const int roll) const
             track[pos] = (track[pos] == '.' ? player_char : 'X');
         }
     }
-    for (const char c : track) std::print("{}", c);
-    std::print("] | ");
+    for (const char c : track) {
+        if constexpr (EnableOutput) std::print("{}", c);
+    }
+    if constexpr (EnableOutput) std::print("] | ");
 
     // 3. Current player
-    std::println("Turn: {} Roll: {}", p_char, roll);
+    if constexpr (EnableOutput) std::println("Turn: {} Roll: {}", p_char, roll);
 }
 
 auto Game::get_absolute_position(const PlayerID player, const int pawn_index) const

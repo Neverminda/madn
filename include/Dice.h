@@ -35,7 +35,10 @@ public:
 
     // Function call operator
     auto operator()()
-    -> int { return dist_(rng_); }
+    -> int
+    {
+        return dist_(rng_);
+    }
 
     static constexpr int min() { return 1; }
     static constexpr int max() { return 6; }

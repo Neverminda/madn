@@ -9,7 +9,8 @@ RandomStrategy::RandomStrategy(const int seed)
     : seed_(seed) {}
 
 auto RandomStrategy::make_move(Game& game, const PlayerID player_id, const int roll)
-const -> bool {
+const -> bool
+{
     // Some move(s) are possible, make a random valid move
     if (const auto valid_moves = game.get_all_valid_moves(player_id, roll); !valid_moves.empty()) {
         // Reuse RNG and distribution across calls for better performance

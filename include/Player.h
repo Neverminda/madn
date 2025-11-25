@@ -39,32 +39,24 @@ public:
      */
     auto play_game(Game &game)
     -> void {
-        const char p_char = to_char(player_id);
-
         while (true) {
             std::unique_lock lock(game.mtx);
-
-            // Wait until it's our turn OR the game is over
-            game.cv.wait(lock, [&]() -> bool {
-                return game.current_player == player_id || game.is_game_over;
-            });
-
-            // If the game is over, terminate the thread
+            game.cv.wait(lock, [&]() -> bool { return game.current_player == player_id || game.is_game_over; });
             if (game.is_game_over) break;
 
-            // --- It's our turn ---
+            // roll
             const int roll = dice();
             const bool earned_another_turn = (roll == 6);
+
+            // update game state based on strategy
             strategy.make_move(game, player_id, roll);
             game.print_game_state(roll);
-
-            // Check for win
             if (game.check_for_win(player_id)) {
                 game.winner = player_id;
                 game.is_game_over = true;
             }
 
-            // --- Pass turn ---
+            // pass the turn if not allowed to roll again
             if (!earned_another_turn || game.is_game_over) game.current_player = next_player(game.current_player);
 
             lock.unlock();

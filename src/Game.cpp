@@ -9,6 +9,7 @@ Game::Game()
     : pawn_positions()
     , current_player(PlayerID::A)
     , is_game_over(false)
+    , rng(std::random_device{}())
 {
     // All pawns start in the home
     for (auto &player_pawns: pawn_positions) {
@@ -221,4 +222,11 @@ auto Game::announce_winner() const
         if (!winner) return;
         std::println("\n*** PLAYER {} HAS WON! ***\n", to_char(*winner));
     }
+}
+
+auto Game::roll_dice()
+-> int
+{
+    std::uniform_int_distribution<int> dist(1, 6);
+    return dist(rng);
 }

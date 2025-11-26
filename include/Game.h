@@ -8,6 +8,7 @@
 #include <functional>
 #include <vector>
 #include <optional>
+#include <random>
 
 /**
  * @brief Contains the entire shared game state and synchronization.
@@ -107,6 +108,13 @@ public:
      */
     auto announce_winner() const
     -> void;
+
+    /**
+     * @brief Rolls the dice (1-6).
+     * @return The dice roll result
+     */
+    auto roll_dice()
+    -> int;
 private:
     /**
      * @brief Updates position_lookup when a pawn moves
@@ -129,4 +137,6 @@ private:
     [[nodiscard]]
     static auto is_at_position(int target_pos)
     -> std::function<bool(int)> { return [target_pos](const int pos) -> bool { return pos == target_pos;}; }
+
+    std::mt19937 rng;
 };

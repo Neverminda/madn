@@ -2,8 +2,6 @@
 
 #include "PlayerID.h"
 #include "PlayerStrategy.h"
-#include "Dice.h"
-#include <random>
 #include <print>
 
 class Game;
@@ -15,11 +13,10 @@ class Game;
  * Manages player state and coordinates with a strategy for decision-making.
  * Each player runs in its own thread and takes turns based on the game state.
  *
- * Template parameters enable both strategy pattern and testable dice injection.
  * Player accepts any PlayerStrategy - individual strategies can enforce
  * CompactStrategy if they want to guarantee memory efficiency.
  */
-template<PlayerStrategy Strategy, DiceRollable Dice = StandardDice>
+template<PlayerStrategy Strategy>
 class Player final {
 public:
     /**
@@ -29,9 +26,7 @@ public:
      */
     Player(const PlayerID id, Strategy strat)
         : player_id(id)
-        , strategy(std::move(strat))
-        , dice_rng(std::random_device{}() + to_int(id))
-        , dice(dice_rng) {}
+        , strategy(std::move(strat)) {}
 
     /**
      * @brief Main game loop for this player (runs in a thread).
@@ -45,7 +40,7 @@ public:
             if (game.is_game_over) break;
 
             // roll
-            const int roll = dice();
+            const int roll = game.roll_dice();
             const bool earned_another_turn = (roll == 6);
 
             // update game state based on strategy
@@ -71,6 +66,4 @@ public:
 private:
     PlayerID player_id;
     Strategy strategy;
-    std::mt19937 dice_rng;
-    Dice dice;              // Mockable dice for testing! // TODO: add tests
 };

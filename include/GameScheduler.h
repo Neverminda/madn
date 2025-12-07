@@ -18,7 +18,7 @@ class TurnAwaiter;
  * This replaces the mutex + condition variable synchronization used in the
  * threading model with cooperative coroutine scheduling.
  */
-class GameScheduler {
+class GameScheduler final {
 public:
     /**
      * @brief Constructs a scheduler for the given game.

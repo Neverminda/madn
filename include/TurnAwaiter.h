@@ -14,7 +14,7 @@ class Game;
  * - await_suspend(): Called when suspending; registers the coroutine handle
  * - await_resume(): Called when resuming; returns void
  */
-class TurnAwaiter {
+class TurnAwaiter final {
 public:
     /**
      * @brief Constructs an awaiter for a specific player's turn.

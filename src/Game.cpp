@@ -7,10 +7,14 @@
 
 Game::Game()
     : pawn_positions()
-    , current_player(PlayerID::A)
+    , current_player(PlayerID::A)  // Will be randomized below
     , is_game_over(false)
     , rng(std::random_device{}())
 {
+    // Randomize starting player
+    std::uniform_int_distribution dist(0, 3);
+    current_player = to_player_id(dist(rng));
+
     // All pawns start in the home
     for (auto &player_pawns: pawn_positions) {
         player_pawns.fill(POS_HOME);

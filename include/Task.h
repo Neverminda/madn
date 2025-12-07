@@ -8,7 +8,7 @@
  *
  * Task<void> provides implements the promise_type required for C++20 coroutines.
  */
-class Task {
+class Task final {
 public:
     /**
      * @brief Promise type required by the C++20 coroutine machinery.

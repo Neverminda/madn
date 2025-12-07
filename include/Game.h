@@ -3,8 +3,6 @@
 #include "constants.h"
 #include "PlayerID.h"
 #include <array>
-#include <mutex>
-#include <condition_variable>
 #include <functional>
 #include <vector>
 #include <optional>
@@ -29,10 +27,6 @@ public:
     PlayerID current_player;
     bool is_game_over;
     std::optional<PlayerID> winner;
-
-    // Synchronization tools
-    std::mutex mtx;
-    std::condition_variable cv;
 
     Game();
 

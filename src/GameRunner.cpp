@@ -2,7 +2,8 @@
 #include "Game.h"
 #include "Player.h"
 #include "RandomStrategy.h"
-#include <thread>
+#include "GameScheduler.h"
+#include "Task.h"
 #include <vector>
 #include <array>
 #include <random>
@@ -14,8 +15,9 @@ auto GameRunner::run_random()
 -> int
 {
     Game game;
+    GameScheduler scheduler{game};
 
-    // Create 4 players with random strategies (compile-time polymorphism!)
+    // Create 4 players with random strategies
     using RandomPlayer = Player<RandomStrategy>;
     std::vector<RandomPlayer> players;
     players.reserve(4);
@@ -24,16 +26,17 @@ auto GameRunner::run_random()
     players.emplace_back(PlayerID::C, RandomStrategy{static_cast<int>(std::random_device{}())});
     players.emplace_back(PlayerID::D, RandomStrategy{static_cast<int>(std::random_device{}())});
 
-    // Start player threads
-    std::array<std::thread, 4> threads;
-    auto indices = std::views::iota(size_t{0}, players.size());
-    std::ranges::for_each(indices, [&](const size_t i) -> void {
-        threads[i] = std::thread(&RandomPlayer::play_game, &players[i], std::ref(game));
-    });
+    // Create 4 coroutine tasks
+    std::array tasks = {
+        players[0].play_game(game, scheduler),
+        players[1].play_game(game, scheduler),
+        players[2].play_game(game, scheduler),
+        players[3].play_game(game, scheduler)
+    };
 
-    // Wait until all threads (players) are finished
-    std::ranges::for_each(threads, [](std::thread& t) -> void { t.join(); });
-
+    // Run the game (single-threaded event loop)
+    // Tasks are automatically destroyed at the end of their scope
+    scheduler.run_until_complete();
     game.announce_winner();
 
     return 0;

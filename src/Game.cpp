@@ -25,10 +25,7 @@ Game::Game()
 }
 
 auto Game::check_for_win(const PlayerID player_id) const
--> bool
-{
-    return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal);
-}
+-> bool { return std::ranges::all_of(pawn_positions[to_int(player_id)], is_in_goal); }
 
 auto Game::print_game_state(const int roll) const
 -> void

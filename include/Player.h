@@ -2,6 +2,9 @@
 
 #include "PlayerID.h"
 #include "PlayerStrategy.h"
+#include "Task.h"
+#include "GameScheduler.h"
+#include "TurnAwaiter.h"
 #include <print>
 
 class Game;
@@ -29,14 +32,16 @@ public:
         , strategy(std::move(strat)) {}
 
     /**
-     * @brief Main game loop for this player (runs in a thread).
+     * @brief Main game loop for this player (runs as a coroutine).
      * @param game Reference to the shared game state
+     * @param scheduler Reference to the coroutine scheduler
      */
-    auto play_game(Game &game)
-    -> void {
+    auto play_game(Game &game, GameScheduler &scheduler)
+    -> Task
+    {
         while (true) {
-            std::unique_lock lock(game.mtx);
-            game.cv.wait(lock, [&]() -> bool { return game.current_player == player_id || game.is_game_over; });
+            co_await scheduler.wait_for_turn(player_id); // this creates a TurnAwaiter
+
             if (game.is_game_over) break;
 
             // roll
@@ -46,16 +51,21 @@ public:
             // update game state based on strategy
             strategy.make_move(game, player_id, roll);
             game.print_game_state(roll);
-            if (game.check_for_win(player_id)) {
-                game.winner = player_id;
-                game.is_game_over = true;
-            }
-
-            // pass the turn if not allowed to roll again
+            check_for_win(game);
             if (!earned_another_turn || game.is_game_over) game.current_player = next_player(game.current_player);
 
-            lock.unlock();
-            game.cv.notify_all();
+            scheduler.notify_turn_complete();
+        }
+
+        co_return;
+    }
+
+    auto check_for_win(Game &game)
+    -> void
+    {
+        if (game.check_for_win(player_id)) {
+            game.winner = player_id;
+            game.is_game_over = true;
         }
     }
 

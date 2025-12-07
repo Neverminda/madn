@@ -11,6 +11,8 @@ set(SOURCES
     src/main.cpp
     src/Game.cpp
     src/GameRunner.cpp
+    src/GameScheduler.cpp
+    src/TurnAwaiter.cpp
     src/RandomStrategy.cpp
 )
 

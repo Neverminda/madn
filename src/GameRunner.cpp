@@ -4,6 +4,7 @@
 #include "RandomStrategy.h"
 #include "GameScheduler.h"
 #include "Task.h"
+#include <variant>
 #include <vector>
 #include <array>
 #include <random>
@@ -11,35 +12,49 @@
 #include <ranges>
 #include <chrono>
 
-auto GameRunner::run_random()
+auto GameRunner::run(std::array<PlayerVariant, 4> players)
 -> int
 {
     Game game;
     GameScheduler scheduler{game};
 
-    // Create 4 players with random strategies
-    using RandomPlayer = Player<RandomStrategy>;
-    std::vector<RandomPlayer> players;
-    players.reserve(4);
-    players.emplace_back(PlayerID::A, RandomStrategy{static_cast<int>(std::random_device{}())});
-    players.emplace_back(PlayerID::B, RandomStrategy{static_cast<int>(std::random_device{}())});
-    players.emplace_back(PlayerID::C, RandomStrategy{static_cast<int>(std::random_device{}())});
-    players.emplace_back(PlayerID::D, RandomStrategy{static_cast<int>(std::random_device{}())});
+    // Create tasks by visiting each variant and calling play_game()
+    // std::visit handles the type dispatch at compile-time
+    std::array<Task, 4> tasks = {
+        std::visit([&](auto& player) {
+            return player.play_game(game, scheduler);
+        }, players[0]),
 
-    // Create 4 coroutine tasks
-    std::array tasks = {
-        players[0].play_game(game, scheduler),
-        players[1].play_game(game, scheduler),
-        players[2].play_game(game, scheduler),
-        players[3].play_game(game, scheduler)
+        std::visit([&](auto& player) {
+            return player.play_game(game, scheduler);
+        }, players[1]),
+
+        std::visit([&](auto& player) {
+            return player.play_game(game, scheduler);
+        }, players[2]),
+
+        std::visit([&](auto& player) {
+            return player.play_game(game, scheduler);
+        }, players[3])
     };
 
-    // Run the game (single-threaded event loop)
-    // Tasks are automatically destroyed at the end of their scope
+    // Run the game (same as run_random)
     scheduler.run_until_complete();
     game.announce_winner();
 
     return 0;
+}
+
+auto GameRunner::run_random()
+    -> void {
+    const std::array<PlayerVariant, 4> players = {
+        Player{PlayerID::A, RandomStrategy{42}},
+        Player{PlayerID::B, RandomStrategy{123}},
+        Player{PlayerID::C, RandomStrategy{456}},
+        Player{PlayerID::D, RandomStrategy{789}}
+    };
+
+    run(players);
 }
 
 auto GameRunner::random_benchmark(const int num_games)

@@ -1,5 +1,8 @@
 #include "GameRunner.h"
+#include "PlayerID.h"
+#include "RandomStrategy.h"
 #include <string>
+#include <random>
 
 int main(const int argc, char* argv[])
 {
@@ -9,5 +12,7 @@ int main(const int argc, char* argv[])
         return GameRunner::random_benchmark(num_games);
     }
 
-    return GameRunner::run_random();
+    GameRunner::run_random();
+
+    return 0;
 }

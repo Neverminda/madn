@@ -1,6 +1,18 @@
 #pragma once
 
-class Game;
+#include "Game.h"
+#include "Player.h"
+#include "RandomStrategy.h"
+#include <variant>
+#include <array>
+
+// Type alias for heterogeneous player support
+// Allows mixing different strategy types in a single game
+using PlayerVariant = std::variant<
+    Player<RandomStrategy>
+    // TODO: Future strategies can be added here:
+    // i.e. Player<OptimalStrategy>, Player<GreedyStrategy>
+>;
 
 /**
  * @brief Orchestrates game execution with multiple player threads.
@@ -13,10 +25,16 @@ class Game;
 class GameRunner final {
 public:
     /**
-     * @brief Runs a complete game with 4 players using the random strategy.
+     * @brief Runs a complete game with 4 players using mixed strategies.
+     * @param players Array of 4 players with potentially different strategies
      * @return Exit code (0 for success)
      */
-    static int run_random();
+    static int run(std::array<PlayerVariant, 4> players);
+
+    /**
+     * @brief Runs a complete game with 4 players using the random strategy.
+     */
+    static void run_random();
 
     /**
      * @brief Benchmarks multiple games (all players with random strategy) and reports timing statistics.

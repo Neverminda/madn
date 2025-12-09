@@ -13,7 +13,8 @@ set(SOURCES
     src/GameRunner.cpp
     src/GameScheduler.cpp
     src/TurnAwaiter.cpp
-    src/RandomStrategy.cpp
+    src/strategies/RandomStrategy.cpp
+    src/strategies/CyclingStrategy.cpp
 )
 
 # Create executable

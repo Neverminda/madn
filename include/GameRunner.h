@@ -2,14 +2,16 @@
 
 #include "Game.h"
 #include "Player.h"
-#include "RandomStrategy.h"
+#include "strategies/RandomStrategy.h"
+#include "strategies/CyclingStrategy.h"
 #include <variant>
 #include <array>
 
 // Type alias for heterogeneous player support
 // Allows mixing different strategy types in a single game
 using PlayerVariant = std::variant<
-    Player<RandomStrategy>
+    Player<RandomStrategy>,
+    Player<CyclingStrategy>
     // TODO: Future strategies can be added here:
     // i.e. Player<OptimalStrategy>, Player<GreedyStrategy>
 >;

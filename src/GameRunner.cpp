@@ -1,15 +1,11 @@
 #include "GameRunner.h"
 #include "Game.h"
 #include "Player.h"
-#include "RandomStrategy.h"
+#include "strategies/RandomStrategy.h"
 #include "GameScheduler.h"
 #include "Task.h"
 #include <variant>
-#include <vector>
 #include <array>
-#include <random>
-#include <algorithm>
-#include <ranges>
 #include <chrono>
 
 auto GameRunner::run(std::array<PlayerVariant, 4> players)
@@ -20,7 +16,7 @@ auto GameRunner::run(std::array<PlayerVariant, 4> players)
 
     // Create tasks by visiting each variant and calling play_game()
     // std::visit handles the type dispatch at compile-time
-    std::array<Task, 4> tasks = {
+    std::array tasks = {
         std::visit([&](auto& player) {
             return player.play_game(game, scheduler);
         }, players[0]),
@@ -47,14 +43,14 @@ auto GameRunner::run(std::array<PlayerVariant, 4> players)
 
 auto GameRunner::run_random()
     -> void {
-    const std::array<PlayerVariant, 4> players = {
+    std::array<PlayerVariant, 4> players = {
         Player{PlayerID::A, RandomStrategy{42}},
         Player{PlayerID::B, RandomStrategy{123}},
         Player{PlayerID::C, RandomStrategy{456}},
         Player{PlayerID::D, RandomStrategy{789}}
     };
 
-    run(players);
+    run(std::move(players));
 }
 
 auto GameRunner::random_benchmark(const int num_games)

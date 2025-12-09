@@ -24,7 +24,7 @@ public:
 
         /**
          * @brief Auto-starts the coroutine (eager execution).
-         * Coroutine begins execution immediately and runs to first suspension point.
+         * Coroutine begins execution immediately and runs to the first suspension point.
          */
         static auto initial_suspend() noexcept
         -> std::suspend_never { return {}; }
@@ -68,7 +68,7 @@ public:
     -> Task& = delete;
 
     /**
-     * @brief Destroys the coroutine handle when Task goes out of scope.
+     * @brief Destroys the coroutine handle when the Task goes out of scope.
      */
     ~Task() {
         if (coroutine_handle) coroutine_handle.destroy();

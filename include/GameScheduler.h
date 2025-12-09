@@ -54,8 +54,8 @@ public:
     /**
      * @brief Runs the game loop until completion.
      *
-     * Starts by resuming Player A's coroutine. The game then proceeds
-     * as coroutines suspend/resume in turn order until game over.
+     * Starts by resuming Player A's coroutine. The game then proceeds as coroutines suspend/resume in turn order until
+     * the game is over.
      */
     auto run_until_complete()
     -> void;

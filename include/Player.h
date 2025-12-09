@@ -1,7 +1,7 @@
 #pragma once
 
 #include "PlayerID.h"
-#include "PlayerStrategy.h"
+#include "strategies/PlayerStrategy.h"
 #include "Task.h"
 #include "GameScheduler.h"
 #include "TurnAwaiter.h"

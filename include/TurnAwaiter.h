@@ -47,7 +47,6 @@ public:
 
     /**
      * @brief Called when the coroutine resumes.
-     * @return Void (no value needed).
      *
      * This is called after the scheduler resumes the coroutine.
      */

@@ -53,14 +53,12 @@ public:
     /**
      * @brief Constructs a Task from a coroutine handle.
      */
-    explicit Task(const handle_type h)
-        : coroutine_handle(h) {}
+    explicit Task(const handle_type h) : coroutine_handle(h) {}
 
     /**
      * @brief Move constructor - transfers ownership of the coroutine handle.
      */
-    Task(Task&& other) noexcept
-        : coroutine_handle(other.coroutine_handle) { other.coroutine_handle = nullptr; }
+    Task(Task&& other) noexcept : coroutine_handle(other.coroutine_handle) { other.coroutine_handle = nullptr; }
 
     // Delete copy operations - Tasks are move-only
     Task(const Task&) = delete;
@@ -92,7 +90,10 @@ public:
      * @brief Resumes the coroutine if it's not done.
      */
     auto resume() const
-    -> void { if (coroutine_handle && !coroutine_handle.done()) coroutine_handle.resume(); }
+    -> void
+    {
+        if (coroutine_handle && !coroutine_handle.done()) coroutine_handle.resume();
+    }
 
     /**
      * @brief Checks if the coroutine has completed.

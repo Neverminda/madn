@@ -1,29 +1,20 @@
-# Mensch Ärgere Dich Nicht / Ludo
+Improve the code using
 
-Assignment for the Advanced Software Development course at University Pforzheim.
+- print
+- ranges
+- concepts
 
----
+Watch out for
 
-## 🛠️ Build & Run
+- memory consumption
+- performance
 
-### Requirements
-- C++23 compliant compiler (i.e., Clang 17+)
-- CMake 4.0+
+What can you achieve ?
 
-### Build
-```bash
-cmake -B build -S .
-cmake --build build
-```
+Reference Performance Measurement
 
-### Run
-```bash
-# Run interactive game
-./build/madn
-
-# Run benchmark (default: 1000 games)
-./build/madn --benchmark
-
-# Run benchmark with custom game count
-./build/madn --benchmark 5000
-```
+- time 12219ms
+- total_moves 3085660
+- moves_per_game 308.6
+- storage_size 234510160byte
+- Program ended with exit code: 0

@@ -9,12 +9,6 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Source files
 set(SOURCES
     src/main.cpp
-    src/Game.cpp
-    src/GameRunner.cpp
-    src/GameScheduler.cpp
-    src/TurnAwaiter.cpp
-    src/strategies/RandomStrategy.cpp
-    src/strategies/CyclingStrategy.cpp
 )
 
 # Create executable
